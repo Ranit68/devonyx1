@@ -14,6 +14,13 @@ const notion = new Client({
 
 const databaseId = process.env.NOTION_DATABASE_ID;
 
+// The Notion data-source ID used by the dataSources.query API.
+// Defaults to the known-good value so the blog works even if the
+// NOTION_DATA_SOURCE_ID env var is not set in Vercel.
+const dataSourceId =
+  process.env.NOTION_DATA_SOURCE_ID ||
+  "3cb20033-0b6d-8061-81bd-000bb0f2243f";
+
 const plainText = (arr = []) =>
   arr.map((t) => t.plain_text).join("");
 
@@ -56,6 +63,7 @@ app.get("/api/health", (_req, res) => {
     ok: true,
     notionToken: !!process.env.NOTION_TOKEN,
     databaseId: !!process.env.NOTION_DATABASE_ID,
+    dataSourceId: dataSourceId,
   });
 });
 
@@ -82,7 +90,7 @@ app.get("/api/posts", async (req, res) => {
     }
 
     const result = await notion.dataSources.query({
-      data_source_id: process.env.NOTION_DATA_SOURCE_ID,
+      data_source_id: dataSourceId,
       filter:
         filterConditions.length > 1
           ? { and: filterConditions }
@@ -110,7 +118,7 @@ app.get("/api/posts/:slug", async (req, res) => {
     const slug = req.params.slug;
 
     const result = await notion.dataSources.query({
-      data_source_id: process.env.NOTION_DATA_SOURCE_ID,
+      data_source_id: dataSourceId,
       filter: {
         and: [
           {
