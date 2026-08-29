@@ -1,14 +1,9 @@
 const brands = [
-  'Nexora',
-  'Fintap',
-  'LaunchPad',
-  'Swiftly',
-  'Vertex Labs',
-  'Orbita',
-  'NovaPay',
-  'Craftline',
-  'Quanta',
-  'Bluepeak',
+  'luxeglow',
+  'heysayan',
+  'amankushwaha',
+  'akas-setu',
+  'vox-rag',
 ]
 
 export default function LogoMarquee() {

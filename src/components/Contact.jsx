@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MessageCircle, Mail, Clock3, MapPin, CheckCircle2, Send } from 'lucide-react'
+import { Mail, Clock3, MapPin, CheckCircle2, Send } from 'lucide-react'
 import { Reveal } from '../hooks'
 
 const budgetOptions = [
@@ -21,10 +21,9 @@ export default function Contact() {
   }
 
   const contactChannels = [
-    { icon: MessageCircle, label: 'WhatsApp', value: '+1 (555) 010-2024', hint: 'Fastest response' },
-    { icon: Mail, label: 'Email', value: 'hello@devonyx.com', hint: 'Replies within 24h' },
-    { icon: Clock3, label: 'Office Hours', value: '9:00 – 18:00', hint: 'Your local time' },
-    { icon: MapPin, label: 'Serving', value: 'USA · UAE · NL · NZ', hint: '4 regions' },
+    { icon: Mail, label: 'Email', value: 'query@devonix.in', hint: 'Replies within 24h' },
+    { icon: Clock3, label: 'Office Hours', value: '24x7', hint: 'Always available' },
+    { icon: MapPin, label: 'Serving', value: 'USA · UAE · NL · NZ · India', hint: '5 regions' },
   ]
 
   const inputClass =
@@ -67,24 +66,6 @@ export default function Contact() {
                   </div>
                 </div>
               ))}
-
-              <div className="rounded-2xl border border-accent/30 bg-accent/10 p-6">
-                <p className="flex items-center gap-2 text-sm font-semibold text-ink">
-                  <Clock3 className="h-4 w-4 text-accent" />
-                  Need a quick answer?
-                </p>
-                <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-                  Chat with us live, or drop a message on WhatsApp — no forms needed.
-                  We schedule calls in your time zone so we're always in sync.
-                </p>
-                <a
-                  href="#"
-                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  Chat on WhatsApp
-                </a>
-              </div>
             </div>
           </Reveal>
 
@@ -98,7 +79,7 @@ export default function Contact() {
                   <h3 className="mt-6 font-display text-2xl font-medium text-ink">Request received!</h3>
                   <p className="mt-3 max-w-sm text-sm leading-relaxed text-ink-soft">
                     Thanks for reaching out. A Devonyx specialist will contact you
-                    within 24 hours. Want to skip the line? Message us on WhatsApp.
+                    within 24 hours at the email you provided.
                   </p>
                   <button
                     onClick={() => setSubmitted(false)}
@@ -127,7 +108,7 @@ export default function Contact() {
                     </div>
                     <div>
                       <label htmlFor="contact-country" className="mb-1.5 block text-sm font-medium text-ink-soft">Country *</label>
-                      <input id="contact-country" name="country" required type="text" placeholder="USA / UAE / NL / NZ…" autoComplete="country-name" className={inputClass} />
+                      <input id="contact-country" name="country" required type="text" placeholder="USA / UAE / NL / NZ / India…" autoComplete="country-name" className={inputClass} />
                     </div>
                     <div className="sm:col-span-2">
                       <label htmlFor="contact-service" className="mb-1.5 block text-sm font-medium text-ink-soft">Service Needed *</label>

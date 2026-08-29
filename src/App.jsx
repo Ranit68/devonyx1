@@ -8,9 +8,10 @@ import About from './components/About'
 import Process from './components/Process'
 import Testimonials from './components/Testimonials'
 import Pricing from './components/Pricing'
+import Blog from './components/Blog'
+import Career from './components/Career'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
-import WhatsAppWidget from './components/WhatsAppWidget'
 
 export default function App() {
   return (
@@ -26,10 +27,11 @@ export default function App() {
         <About />
         <Testimonials />
         <Pricing />
+        <Blog />
+        <Career />
         <Contact />
       </main>
       <Footer />
-      <WhatsAppWidget />
     </div>
   )
 }

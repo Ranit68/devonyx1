@@ -1,68 +1,180 @@
+import { useState } from 'react'
 import { Check, ArrowRight, Sparkles } from 'lucide-react'
 import { Reveal } from '../hooks'
 
-const tiers = [
+const tabs = [
   {
-    name: 'Starter',
-    price: '2,500',
-    currency: 'USD',
-    period: '/project',
-    description: 'Perfect for a focused, single-pillar project — a landing page, a brand refresh, or a campaign.',
-    features: [
-      '1 service pillar (Build / Grow / Brand)',
-      'Fixed scope & timeline',
-      'Dedicated project manager',
-      '2 revision rounds',
-      'Email support',
-      '7-day delivery for most projects',
+    id: 'development',
+    label: 'Development',
+    tiers: [
+      {
+        name: 'Starter',
+        price: '399',
+        priceNote: '/ project',
+        description: 'A focused starter build — a landing page, a simple web app, or an MVP slice.',
+        features: [
+          'Single-page website or MVP',
+          'Responsive design',
+          'React / modern stack',
+          '1 revision round',
+          'Basic SEO setup',
+          '5-day delivery',
+        ],
+        cta: 'Get a Build',
+        featured: false,
+      },
+      {
+        name: 'Growth',
+        price: '899',
+        priceNote: '/ project',
+        description: 'A full product build — multi-page app, custom features, and clean architecture.',
+        features: [
+          'Full web app / SaaS build',
+          'Custom features & integrations',
+          'Database + backend',
+          '2 revision rounds',
+          'Deploy & hosting setup',
+          '15-day delivery',
+        ],
+        cta: 'Start a Growth Build',
+        featured: true,
+      },
+      {
+        name: 'Custom',
+        price: 'Custom',
+        priceNote: '',
+        description: 'Scaling teams and complex platforms need a dedicated build partner.',
+        features: [
+          'Complex / enterprise platform',
+          'Dedicated development team',
+          'Sprint-based delivery',
+          'SLA & support',
+          'Custom AI & integrations',
+          'Ongoing maintenance',
+        ],
+        cta: 'Talk About Custom',
+        featured: false,
+      },
     ],
-    cta: 'Get a Starter Quote',
-    featured: false,
   },
   {
-    name: 'Growth',
-    price: '8,000',
-    currency: 'USD',
-    period: '/project',
-    description: 'Our most popular. A full product launch, complete brand, or growth engine — two or more pillars.',
-    features: [
-      '2–3 service pillars combined',
-      'Sprint-based delivery',
-      'Weekly demo calls',
-      'Unlimited revisions on scope',
-      'Priority support',
-      'Performance reporting',
-      '30-day post-launch support',
+    id: 'marketing',
+    label: 'Marketing',
+    tiers: [
+      {
+        name: 'Starter',
+        price: '199',
+        priceNote: '/ project',
+        description: 'Kick off growth with a focused campaign, funnel, or SEO foundation.',
+        features: [
+          '1 ad campaign / funnel',
+          'Google & Meta ads setup',
+          'Keyword research & SEO',
+          'Conversion tracking',
+          'Monthly report',
+        ],
+        cta: 'Get a Campaign',
+        featured: false,
+      },
+      {
+        name: 'Growth',
+        price: '299',
+        priceNote: '/ project',
+        description: 'A full performance-marketing engine across channels with optimization.',
+        features: [
+          'Multi-channel campaigns',
+          'Landing pages & funnels',
+          'A/B testing & CRO',
+          'Automation & lead routing',
+          'Weekly optimization',
+          'Performance dashboard',
+        ],
+        cta: 'Scale My Growth',
+        featured: true,
+      },
+      {
+        name: 'Custom',
+        price: 'Custom',
+        priceNote: '',
+        description: 'For scaling teams needing an embedded, ongoing growth partner.',
+        features: [
+          'Always-on paid media',
+          'Dedicated marketing team',
+          'Full-funnel strategy',
+          'SLA & reporting',
+          'Multi-region campaigns',
+          'Retainer model',
+        ],
+        cta: 'Talk About Custom',
+        featured: false,
+      },
     ],
-    cta: 'Book a Growth Call',
-    featured: true,
   },
   {
-    name: 'Enterprise',
-    price: 'Custom',
-    currency: '',
-    period: '',
-    description: 'For scaling teams and funded startups that need a long-term, embedded product & growth partner.',
-    features: [
-      'All 3 pillars, dedicated team',
-      'Retainer or outcome-based model',
-      'Dedicated product owner',
-      'SLA & escalation path',
-      'Multi-region rollout',
-      'Custom AI & integrations',
+    id: 'design',
+    label: 'Design',
+    tiers: [
+      {
+        name: 'Starter',
+        price: '99',
+        priceNote: '/ project',
+        description: 'A sharp logo, brand refresh, or a short video edit to get you looking pro.',
+        features: [
+          'Logo design',
+          'Social media creatives',
+          'Basic video editing',
+          '2 revision rounds',
+          'Vector + web formats',
+        ],
+        cta: 'Start a Design',
+        featured: false,
+      },
+      {
+        name: 'Growth',
+        price: '189',
+        priceNote: '/ project',
+        description: 'A complete visual identity or a fuller video & motion package.',
+        features: [
+          'Full brand identity & guidelines',
+          'Banner & social set',
+          'Motion graphics',
+          'Video editing & posts',
+          '3 revision rounds',
+          'Brand kit delivered',
+        ],
+        cta: 'Level Up My Brand',
+        featured: true,
+      },
+      {
+        name: 'Custom',
+        price: 'Custom',
+        priceNote: '',
+        description: 'A design studio on demand for ongoing brand, motion, and video needs.',
+        features: [
+          'Unlimited design requests',
+          'Video production & editing',
+          'Motion & 3D',
+          'Priority turnaround',
+          'Dedicated designer',
+          'Retainer model',
+        ],
+        cta: 'Talk About Custom',
+        featured: false,
+      },
     ],
-    cta: 'Talk to Sales',
-    featured: false,
   },
 ]
 
 export default function Pricing() {
+  const [active, setActive] = useState('development')
+  const tiers = tabs.find((t) => t.id === active).tiers
+
   return (
     <section id="pricing" className="section bg-white/40">
       <div className="container-x relative">
         <div className="mx-auto max-w-2xl text-center">
           <Reveal>
-            <span className="eyebrow">Pricing</span>
+            <span className="eyebrow justify-center">Pricing</span>
           </Reveal>
           <Reveal delay={100}>
             <h2 className="mt-5 text-balance font-display text-4xl font-medium tracking-tight text-ink md:text-5xl">
@@ -71,16 +183,33 @@ export default function Pricing() {
           </Reveal>
           <Reveal delay={200}>
             <p className="mt-5 text-lg text-ink-soft">
-              Every project is scoped to you. Start with a package or get a
-              custom quote — either way, no surprises. Prices shown in USD; we
-              invoice in USD, AED, EUR & NZD.
+              Pick a pillar below — Development, Marketing, or Design. Every
+              package is negotiable and scoped to you. Prices in USD.
             </p>
           </Reveal>
         </div>
 
-        <div className="mt-14 grid gap-6 lg:grid-cols-3">
+        <Reveal delay={250}>
+          <div className="mx-auto mt-10 flex w-fit flex-wrap justify-center gap-2 rounded-full border border-hairline bg-surface p-1.5">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActive(tab.id)}
+                className={`rounded-full px-6 py-2.5 text-sm font-semibold transition-colors ${
+                  active === tab.id
+                    ? 'bg-ink-gradient text-white shadow'
+                    : 'text-ink-soft hover:text-ink'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </Reveal>
+
+        <div className="mt-12 grid gap-6 lg:grid-cols-3">
           {tiers.map((tier, i) => (
-            <Reveal key={tier.name} delay={i * 120}>
+            <Reveal key={`${active}-${tier.name}`} delay={i * 120}>
               <div
                 className={`relative flex h-full flex-col rounded-3xl p-8 transition-all duration-300 ${
                   tier.featured
@@ -95,11 +224,20 @@ export default function Pricing() {
                 )}
                 <h3 className={`font-display text-lg font-medium ${tier.featured ? 'text-white' : 'text-ink'}`}>{tier.name}</h3>
                 <div className="mt-4 flex items-end gap-1">
-                  {tier.currency && <span className={`pb-2 text-xl ${tier.featured ? 'text-white/60' : 'text-ink-muted'}`}>{tier.currency}</span>}
-                  <span className={`font-display text-5xl font-medium ${tier.featured ? 'text-white' : 'text-ink'}`}>{tier.price}</span>
-                  {tier.period && <span className={`pb-2 text-sm ${tier.featured ? 'text-white/60' : 'text-ink-muted'}`}>{tier.period}</span>}
+                  {tier.price === 'Custom' ? (
+                    <span className={`font-display text-5xl font-medium ${tier.featured ? 'text-white' : 'text-ink'}`}>{tier.price}</span>
+                  ) : (
+                    <>
+                      <span className={`pb-2 font-mono text-xl ${tier.featured ? 'text-white/60' : 'text-ink-muted'}`}>US$</span>
+                      <span className={`font-display text-5xl font-medium ${tier.featured ? 'text-white' : 'text-ink'}`}>{tier.price}</span>
+                      <span className={`pb-2 text-sm ${tier.featured ? 'text-white/60' : 'text-ink-muted'}`}>{tier.priceNote}</span>
+                    </>
+                  )}
                 </div>
-                <p className={`mt-4 text-sm leading-relaxed ${tier.featured ? 'text-white/80' : 'text-ink-soft'}`}>{tier.description}</p>
+                <p className={`mt-2 text-xs font-semibold ${tier.featured ? 'text-accent' : 'text-brand-dark'}`}>
+                  {tier.price === 'Custom' ? 'Scope-based pricing' : 'Negotiable pricing'}
+                </p>
+                <p className={`mt-3 text-sm leading-relaxed ${tier.featured ? 'text-white/80' : 'text-ink-soft'}`}>{tier.description}</p>
 
                 <ul className="mt-6 flex flex-1 flex-col gap-3">
                   {tier.features.map((feature) => (
@@ -131,7 +269,7 @@ export default function Pricing() {
         <Reveal delay={200}>
           <p className="mt-10 flex items-center justify-center gap-2 text-center text-sm text-ink-muted">
             <Sparkles className="h-4 w-4 text-brand" />
-            Not sure what you need? Book a free 30-minute strategy call — we'll point you in the right direction.
+            Not sure what you need? Book a free 30-minute strategy call — pricing is always negotiable.
           </p>
         </Reveal>
       </div>

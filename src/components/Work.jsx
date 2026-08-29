@@ -14,7 +14,13 @@ const projects = [
       'A full SaaS platform for invoice financing — built from scratch, deployed, and live for early users within six weeks.',
     tags: ['SaaS', 'Web App', 'Custom Dev'],
     barColor: 'from-brand to-brand-dark',
-    bars: [35, 50, 42, 65, 70, 88, 100],
+    line: '#2B4BFF',
+    bars: [38, 52, 46, 66, 72, 88, 100],
+    kpis: [
+      { label: 'Weeks to launch', value: '6' },
+      { label: 'Users onboard', value: '1.2k' },
+      { label: 'Uptime', value: '99.9%' },
+    ],
   },
   {
     pillar: 'Grow',
@@ -28,7 +34,13 @@ const projects = [
       'Rebuilt the acquisition funnel with Google & Meta ads, automation, and conversion optimization — doubling revenue in a quarter.',
     tags: ['Performance Marketing', 'SEO', 'Automation'],
     barColor: 'from-[#7C6BFF] to-brand',
-    bars: [25, 40, 38, 58, 62, 80, 95],
+    line: '#7C6BFF',
+    bars: [30, 42, 52, 58, 66, 82, 95],
+    kpis: [
+      { label: 'Leads / mo', value: '3.2k' },
+      { label: 'CAC down', value: '-38%' },
+      { label: 'ROAS', value: '4.6x' },
+    ],
   },
   {
     pillar: 'Brand',
@@ -42,7 +54,13 @@ const projects = [
       'Full identity for a D2C startup — logo, guidelines, social system, and motion assets that made the brand instantly recognizable.',
     tags: ['Identity', 'Guidelines', 'Motion'],
     barColor: 'from-accent to-brand',
-    bars: [40, 55, 50, 72, 78, 90, 100],
+    line: '#E8A33D',
+    bars: [44, 58, 66, 74, 80, 92, 100],
+    kpis: [
+      { label: 'Brand recall', value: '3x' },
+      { label: 'Recognition', value: '+64%' },
+      { label: 'Assets', value: '120+' },
+    ],
   },
 ]
 
@@ -63,7 +81,7 @@ export default function Work() {
             <Reveal delay={200}>
               <p className="mt-5 text-lg text-ink-soft">
                 Real projects, real outcomes. A look at what Devonyx delivers for
-                founders across the USA, UAE, Netherlands & New Zealand.
+                founders across the USA, UAE, Netherlands, New Zealand & India.
               </p>
             </Reveal>
           </div>
@@ -94,24 +112,27 @@ export default function Work() {
                     </span>
                   </div>
 
-                  <div className="mb-5 rounded-2xl border border-hairline bg-paper p-4">
-                    <div className="mb-2 flex items-end justify-between">
+                  <div className="mb-4 rounded-2xl border border-hairline bg-paper p-4">
+                    <div className="mb-3 flex items-end justify-between">
                       <p className={`font-display text-3xl font-medium bg-gradient-to-r ${project.gradient} bg-clip-text text-transparent`}>
                         {project.metric}
                       </p>
                       <p className="font-mono text-xs text-ink-muted">{project.metricLabel}</p>
                     </div>
-                    <div className="flex h-20 items-end gap-2">
-                      {project.bars.map((b, j) => (
-                        <div key={j} className="flex-1">
-                          <div className={`w-full rounded-t bg-gradient-to-t ${project.barColor} transition-all duration-500 group-hover:opacity-100`} style={{ height: `${b}%`, opacity: 0.75 }} />
-                        </div>
-                      ))}
-                    </div>
+                    <ProjectChart bars={project.bars} color={project.line} />
+                  </div>
+
+                  <div className="mb-5 grid grid-cols-3 gap-2">
+                    {project.kpis.map((kpi) => (
+                      <div key={kpi.label} className="rounded-xl border border-hairline bg-surface px-2 py-2.5 text-center">
+                        <p className="font-display text-base font-medium text-ink">{kpi.value}</p>
+                        <p className="mt-0.5 font-mono text-[10px] uppercase tracking-wide text-ink-muted">{kpi.label}</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                <div className="flex flex-col p-6 pt-4">
+                <div className="flex flex-col p-6 pt-0">
                   <h3 className="font-display text-xl font-medium text-ink">{project.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-ink-soft">{project.description}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -128,5 +149,38 @@ export default function Work() {
         </div>
       </div>
     </section>
+  )
+}
+
+function ProjectChart({ bars, color }) {
+  const W = 240
+  const H = 70
+  const pad = 4
+  const max = 100
+  const step = (W - pad * 2) / (bars.length - 1)
+  const pts = bars.map((b, i) => [pad + i * step, H - pad - (b / max) * (H - pad * 2)])
+  const line = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ')
+  const area = `${line} L${pts[pts.length - 1][0].toFixed(1)},${H} L${pts[0][0].toFixed(1)},${H} Z`
+
+  return (
+    <div className="relative h-20">
+      <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id={`fill-${color.replace('#', '')}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor={color} stopOpacity="0.28" />
+            <stop offset="1" stopColor={color} stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        <path d={area} fill={`url(#fill-${color.replace('#', '')})`} />
+        <path d={line} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <div className="relative flex h-20 items-end gap-1.5">
+        {bars.map((b, i) => (
+          <div key={i} className="flex-1 rounded-t bg-black/[0.05]"
+            style={{ height: `${b}%` }}
+          />
+        ))}
+      </div>
+    </div>
   )
 }

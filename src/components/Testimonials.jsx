@@ -54,7 +54,7 @@ export default function Testimonials() {
           </Reveal>
           <Reveal delay={100}>
             <h2 className="mt-5 text-balance font-display text-4xl font-medium tracking-tight text-ink md:text-5xl">
-              Founders across <span className="serif-accent text-brand-dark">4 regions</span> trust us.
+              Founders across <span className="serif-accent text-brand-dark">5 regions</span> trust us.
             </h2>
           </Reveal>
         </div>

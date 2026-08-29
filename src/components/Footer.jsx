@@ -22,6 +22,8 @@ const companyLinks = [
   { label: 'Our Work', href: '#work' },
   { label: 'Process', href: '#process' },
   { label: 'Pricing', href: '#pricing' },
+  { label: 'Blog', href: '#blog' },
+  { label: 'Careers', href: '#career' },
   { label: 'Get a Quote', href: '#contact' },
 ]
 
@@ -38,7 +40,7 @@ export default function Footer() {
             <Logo className="text-white [&_.serif-accent]:text-accent" />
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/70">
               A digital agency helping founders build, brand, and grow — trusted
-              across the USA, UAE, Netherlands & New Zealand.
+              across the USA, UAE, Netherlands, New Zealand & India.
             </p>
             <div className="mt-6 flex gap-3">
               {socialLinks.map(({ icon: Icon, label }) => (

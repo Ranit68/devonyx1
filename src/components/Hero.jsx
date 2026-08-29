@@ -1,7 +1,7 @@
 import { ArrowRight, ShieldCheck, Globe2 } from 'lucide-react'
 import { Reveal } from '../hooks'
 
-const clientRegions = ['USA', 'UAE', 'Netherlands', 'New Zealand']
+const clientRegions = ['USA', 'UAE', 'Netherlands', 'New Zealand', 'India']
 
 export default function Hero() {
   return (
@@ -95,7 +95,7 @@ export default function Hero() {
                 </div>
                 <div className="hidden items-center gap-2 text-sm text-ink-muted md:flex">
                   <Globe2 className="h-4 w-4 text-brand" />
-                  Serving 4 time zones
+                  Serving 5 time zones
                 </div>
               </div>
             </Reveal>
@@ -183,17 +183,63 @@ function HeroPanel() {
 }
 
 function BarChart() {
-  const heights = [30, 45, 38, 60, 52, 70, 64, 82, 74, 90, 85, 100]
+  const data = [
+    { m: 'Jan', v: 34 },
+    { m: 'Feb', v: 46 },
+    { m: 'Mar', v: 42 },
+    { m: 'Apr', v: 58 },
+    { m: 'May', v: 54 },
+    { m: 'Jun', v: 68 },
+    { m: 'Jul', v: 64 },
+    { m: 'Aug', v: 79 },
+    { m: 'Sep', v: 76 },
+    { m: 'Oct', v: 88 },
+    { m: 'Nov', v: 92 },
+    { m: 'Dec', v: 100 },
+  ]
+  const W = 280
+  const H = 92
+  const pad = 6
+  const step = (W - pad * 2) / (data.length - 1)
+  const pts = data.map((d, i) => [pad + i * step, H - pad - (d.v / 102) * (H - pad * 2)])
+  const line = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ')
+  const area = `${line} L${pts[pts.length - 1][0].toFixed(1)},${H} L${pts[0][0].toFixed(1)},${H} Z`
+
   return (
-    <div className="flex h-28 items-end gap-2">
-      {heights.map((h, i) => (
-        <div key={i} className="group relative flex-1">
-          <div
-            className="w-full rounded-t-md bg-gradient-to-t from-brand to-[#7C6BFF] opacity-80 transition-all group-hover:opacity-100"
-            style={{ height: `${h}%` }}
-          />
+    <div className="relative">
+      <div className="relative h-28">
+        <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="lineFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#2B4BFF" stopOpacity="0.28" />
+              <stop offset="1" stopColor="#2B4BFF" stopOpacity="0.02" />
+            </linearGradient>
+          </defs>
+          <path d={area} fill="url(#lineFill)" />
+          <path d={line} fill="none" stroke="#2B4BFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <div className="relative flex h-28 items-end gap-1.5">
+          {data.map((d, i) => (
+            <div key={d.m} className="group relative flex-1">
+              <div
+                className="w-full rounded-t bg-brand/85 transition-colors group-hover:bg-brand"
+                style={{ height: `${(d.v / 102) * 96}%` }}
+              />
+              <span className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-ink px-1.5 py-0.5 font-mono text-[10px] font-medium text-white opacity-0 transition-opacity group-hover:opacity-100">
+                {d.v}k
+              </span>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
+      <div className="mt-2 flex justify-between font-mono text-[9px] uppercase tracking-wide text-ink-muted">
+        <span>Jan</span>
+        <span>Mar</span>
+        <span>May</span>
+        <span>Jul</span>
+        <span>Sep</span>
+        <span>Nov</span>
+      </div>
     </div>
   )
 }

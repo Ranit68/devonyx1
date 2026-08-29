@@ -4,7 +4,7 @@ const stats = [
   { value: 250, suffix: '+', label: 'Projects Delivered' },
   { value: 98, suffix: '%', label: 'Client Satisfaction' },
   { value: 120, suffix: '+', label: 'Startups & Businesses' },
-  { value: 4, suffix: '×', label: 'Regions Served' },
+  { value: 5, suffix: '×', label: 'Regions Served' },
 ]
 
 export function CountUpStat({ value, suffix = '', label }) {

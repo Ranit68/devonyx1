@@ -42,7 +42,7 @@ export default function About() {
               <p className="mt-4 text-lg leading-relaxed text-ink-soft">
                 Today, we're a tight-knit team of developers, marketers, and designers
                 helping founders and businesses across{' '}
-                <span className="font-semibold text-ink">the USA, UAE, Netherlands, and New Zealand</span>{' '}
+                <span className="font-semibold text-ink">the USA, UAE, Netherlands, New Zealand, and India</span>{' '}
                 build, brand, and grow. That's the whole point of the name: from{' '}
                 <span className="font-semibold text-brand-dark">Dev</span>elop, to{' '}
                 <span className="font-semibold text-brand-dark">On</span>shot success, to growth.
@@ -51,7 +51,7 @@ export default function About() {
 
             <Reveal delay={400}>
               <div className="mt-8 flex flex-wrap gap-3">
-                {['Since 2018', 'Remote-first', '4 regions', '120+ launches'].map((badge) => (
+                {['Since 2018', 'Remote-first', '5 regions', '120+ launches'].map((badge) => (
                   <span key={badge} className="rounded-full border border-hairline bg-surface px-4 py-2 text-sm text-ink-muted">
                     {badge}
                   </span>
@@ -82,7 +82,7 @@ export default function About() {
 
               <div className="mt-8 flex items-center gap-2 border-t border-hairline pt-6 text-sm text-ink-muted">
                 <MapPin className="h-4 w-4 text-brand" />
-                Working across 4 time zones · North America, Middle East, Europe & Oceania
+                Working across 5 time zones · North America, Middle East, Europe, Oceania & Asia
               </div>
             </div>
           </Reveal>
