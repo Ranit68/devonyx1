@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { ArrowUpRight, Briefcase, Clock3, MapPin, Mail, Send } from 'lucide-react'
+import { ArrowLeft, ArrowUpRight, Briefcase, MapPin, Mail, Send } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { Reveal } from '../hooks'
 
 const roles = [
@@ -145,6 +146,15 @@ export default function Career() {
               </p>
             </form>
           </Reveal>
+        </div>
+
+        <div className="mt-14 text-center">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 rounded-full border border-hairline bg-white px-6 py-3 text-sm font-medium text-ink transition-colors hover:border-brand hover:text-brand"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back to home
+          </Link>
         </div>
       </div>
     </section>

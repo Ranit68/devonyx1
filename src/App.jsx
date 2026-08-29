@@ -1,3 +1,4 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import Stats from './components/Stats'
@@ -8,14 +9,14 @@ import About from './components/About'
 import Process from './components/Process'
 import Testimonials from './components/Testimonials'
 import Pricing from './components/Pricing'
-import Blog from './components/Blog'
-import Career from './components/Career'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
+import BlogPage from './pages/BlogPage'
+import CareerPage from './pages/CareerPage'
 
-export default function App() {
+function Home() {
   return (
-    <div className="min-h-screen bg-paper text-ink">
+    <>
       <Header />
       <main>
         <Hero />
@@ -27,11 +28,23 @@ export default function App() {
         <About />
         <Testimonials />
         <Pricing />
-        <Blog />
-        <Career />
         <Contact />
       </main>
       <Footer />
-    </div>
+    </>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <div className="min-h-screen bg-paper text-ink">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/careers" element={<CareerPage />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
   )
 }

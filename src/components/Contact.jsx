@@ -14,10 +14,30 @@ const services = ['Build (Development)', 'Grow (Marketing)', 'Brand (Design)', '
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false)
+  const [status, setStatus] = useState('idle')
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setSubmitted(true)
+    const form = e.currentTarget
+    const data = Object.fromEntries(new FormData(form).entries())
+    setStatus('sending')
+
+    try {
+      const res = await fetch('https://formspree.io/f/xoeqvvgd', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          ...data,
+          _subject: `New quote request from ${data.name}`,
+        }),
+      })
+      if (!res.ok) throw new Error('Submission failed')
+      setStatus('success')
+      setSubmitted(true)
+      form.reset()
+    } catch (err) {
+      setStatus('error')
+    }
   }
 
   const contactChannels = [
@@ -143,11 +163,17 @@ export default function Contact() {
 
                   <button
                     type="submit"
-                    className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink-gradient px-7 py-3.5 text-base font-semibold text-white shadow-lg shadow-ink/20 transition-all hover:shadow-xl hover:shadow-ink/30 hover:brightness-125"
+                    disabled={status === 'sending'}
+                    className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink-gradient px-7 py-3.5 text-base font-semibold text-white shadow-lg shadow-ink/20 transition-all hover:shadow-xl hover:shadow-ink/30 hover:brightness-125 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <Send className="h-5 w-5" />
-                    Request My Free Quote
+                    {status === 'sending' ? 'Sending…' : 'Request My Free Quote'}
                   </button>
+                  {status === 'error' && (
+                    <p className="mt-3 text-center text-sm text-red-600">
+                      Something went wrong. Please try again or email query@devonix.in.
+                    </p>
+                  )}
                   <p className="mt-3 text-center text-xs text-ink-muted">
                     By submitting, you agree to our privacy policy. We'll never share your information.
                   </p>

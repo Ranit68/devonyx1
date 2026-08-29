@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
-import { ArrowLeft, ArrowUpRight, CalendarDays, FileText, ExternalLink } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { ArrowLeft, ArrowUpRight, CalendarDays, FileText } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { Reveal } from '../hooks'
 
 function formatDate(d) {
@@ -9,12 +10,137 @@ function formatDate(d) {
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
+// ---- Normalize a post object from the API (supports both our fields and the server's) ----
+function normalizePost(p) {
+  return {
+    id: p.id,
+    slug: p.slug || p.id,
+    title: p.title || p.name || 'Untitled',
+    date: p.date || '',
+    description: p.description || '',
+    seoTitle: p.seoTitle || '',
+    tags: Array.isArray(p.tags) ? p.tags : [],
+    cover: p.cover || null,
+    published: p.published !== false,
+    blocks: Array.isArray(p.blocks) ? p.blocks : undefined,
+  }
+}
+
+// ---- Render rich text (bold / italic / code / links / etc.) ----
+function RichText({ value }) {
+  return (
+    <>
+      {(value || []).map((t, i) => {
+        const { annotations = {}, href } = t
+        let node = <>{t.plain_text}</>
+        if (href) {
+          node = (
+            <a href={href} target="_blank" rel="noopener noreferrer">
+              {t.plain_text}
+            </a>
+          )
+        }
+        if (annotations.bold) node = <strong>{node}</strong>
+        if (annotations.italic) node = <em>{node}</em>
+        if (annotations.underline) node = <u>{node}</u>
+        if (annotations.strikethrough) node = <del>{node}</del>
+        if (annotations.code) node = <code>{node}</code>
+        return <span key={i}>{node}</span>
+      })}
+    </>
+  )
+}
+
+// ---- Convert Notion blocks + children into React elements ----
+function Blocks({ blocks, depth = 0 }) {
+  if (!blocks || blocks.length === 0 || depth > 4) return null
+
+  return (
+    <div className={depth === 0 ? 'mt-2' : ''}>
+      {blocks.map((block) => {
+        const children = block.has_children ? <Blocks blocks={block.children || []} depth={depth + 1} /> : null
+        const rt = (b) => b?.rich_text || []
+        switch (block.type) {
+          case 'paragraph':
+            return (
+              <p key={block.id}>{rt(block.paragraph) ? <RichText value={rt(block.paragraph)} /> : '\u00A0'}</p>
+            )
+          case 'heading_1':
+            return <h2 key={block.id}><RichText value={rt(block.heading_1)} /></h2>
+          case 'heading_2':
+            return <h3 key={block.id}><RichText value={rt(block.heading_2)} /></h3>
+          case 'heading_3':
+            return <h4 key={block.id}><RichText value={rt(block.heading_3)} /></h4>
+          case 'bulleted_list_item':
+            return (
+              <li key={block.id}>
+                <RichText value={rt(block.bulleted_list_item)} />
+                {children}
+              </li>
+            )
+          case 'numbered_list_item':
+            return (
+              <li key={block.id}>
+                <RichText value={rt(block.numbered_list_item)} />
+                {children}
+              </li>
+            )
+          case 'to_do':
+            return (
+              <p key={block.id} className="notion-todo">
+                {block.to_do?.checked ? '☑' : '☐'}&nbsp;<RichText value={rt(block.to_do)} />
+              </p>
+            )
+          case 'toggle':
+            return (
+              <details key={block.id}>
+                <summary><RichText value={rt(block.toggle)} /></summary>
+                {children}
+              </details>
+            )
+          case 'quote':
+            return <blockquote key={block.id}><RichText value={rt(block.quote)} /></blockquote>
+          case 'code':
+            return (
+              <pre key={block.id}>
+                <code>{rt(block.code).map((t) => t.plain_text).join('')}</code>
+              </pre>
+            )
+          case 'divider':
+            return <hr key={block.id} />
+          case 'callout':
+            return (
+              <div key={block.id} className="notion-callout">
+                <RichText value={rt(block.callout)} />
+              </div>
+            )
+          case 'image': {
+            const img = block.image
+            const src = img?.type === 'external' ? img.external?.url : img?.file?.url
+            if (!src) return null
+            return (
+              <figure key={block.id}>
+                <img src={src} alt={img?.caption?.map((c) => c.plain_text).join('') || ''} loading="lazy" />
+                {img?.caption?.length > 0 && <figcaption>{img.caption.map((c) => c.plain_text).join('')}</figcaption>}
+              </figure>
+            )
+          }
+          case 'child_page':
+            return null
+          default:
+            return null
+        }
+      })}
+    </div>
+  )
+}
+
 export default function Blog() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [selected, setSelected] = useState(null)
-  const [content, setContent] = useState(null)
+  const [post, setPost] = useState(null)
   const [contentLoading, setContentLoading] = useState(false)
 
   useEffect(() => {
@@ -25,7 +151,14 @@ export default function Blog() {
         return res.json()
       })
       .then((data) => {
-        if (!cancelled) setPosts(data)
+        if (cancelled) return
+        if (Array.isArray(data)) {
+          setPosts(data.filter((p) => p.published).map(normalizePost))
+        } else if (data.posts) {
+          setPosts(data.posts.filter((p) => p.published).map(normalizePost))
+        } else if (data.error) {
+          setError(data.error)
+        }
       })
       .catch((err) => {
         if (!cancelled) setError(err.message || 'Could not load posts')
@@ -38,20 +171,30 @@ export default function Blog() {
     }
   }, [])
 
-  const openPost = (postId) => {
-    const post = posts.find(p => p.id === postId)
-    if (!post) return
-    setSelected(postId)
-    setContent(null)
+  const openPost = useCallback(async (slug) => {
+    setSelected(slug)
+    setPost(null)
     setContentLoading(true)
-    fetch(`/api/posts/${post.slug}`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`Server responded ${res.status}`)
-        return res.json()
-      })
-      .then((data) => setContent(data))
-      .catch((err) => setError(err.message || 'Could not load post'))
-      .finally(() => setContentLoading(false))
+    try {
+      const res = await fetch(`/api/posts/${encodeURIComponent(slug)}`)
+      if (!res.ok) throw new Error(`Server responded ${res.status}`)
+      const data = await res.json()
+      if (data.error) {
+        setError(data.error)
+      } else {
+        setPost(normalizePost(data))
+      }
+    } catch (err) {
+      setError(err.message || 'Could not load post')
+    } finally {
+      setContentLoading(false)
+    }
+  }, [])
+
+  const goBack = () => {
+    setSelected(null)
+    setPost(null)
+    setError('')
   }
 
   return (
@@ -74,64 +217,55 @@ export default function Blog() {
               </p>
             </Reveal>
           </div>
-          <Reveal delay={250}>
-            <a
-              href="https://scandalous-alfalfa-550.notion.site/3cb200330b6d804f903cdeab416b822e?v=3cb200330b6d80a69f3d000cefcc6171"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex flex-shrink-0 items-center gap-2 rounded-full border border-hairline bg-white px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:border-brand hover:text-brand"
-            >
-              Open in Notion <ExternalLink className="h-4 w-4" />
-            </a>
-          </Reveal>
         </div>
 
         {selected ? (
           <article className="mx-auto mt-12 max-w-3xl">
             <button
-              onClick={() => setSelected(null)}
+              onClick={goBack}
               className="inline-flex items-center gap-2 text-sm font-medium text-ink-muted transition-colors hover:text-brand"
             >
               <ArrowLeft className="h-4 w-4" /> All posts
             </button>
             {contentLoading && <p className="mt-8 text-ink-muted">Loading post…</p>}
-            {content && (
+            {error && !contentLoading && <p className="mt-8 text-sm text-ink-soft">{error}</p>}
+            {post && (
               <>
                 <h3 className="mt-6 font-display text-3xl font-medium tracking-tight text-ink md:text-4xl">
-                  {content.name}
+                  {post.title}
                 </h3>
                 <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-muted">
-                  {content.date && (
+                  {post.date && (
                     <span className="flex items-center gap-1.5">
-                      <CalendarDays className="h-4 w-4" /> {formatDate(content.date)}
+                      <CalendarDays className="h-4 w-4" /> {formatDate(post.date)}
                     </span>
                   )}
-                  {content.tags?.length > 0 && (
+                  {post.tags.length > 0 && (
                     <span className="flex items-center gap-1.5">
-                      <FileText className="h-4 w-4" /> {content.tags.join(', ')}
+                      <FileText className="h-4 w-4" /> {post.tags.join(', ')}
                     </span>
                   )}
                 </p>
-                {content.cover && (
+                {post.cover && (
                   <img
-                    src={content.cover}
-                    alt={content.name}
+                    src={post.cover}
+                    alt={post.title}
                     className="mt-8 h-64 w-full rounded-2xl border border-hairline object-cover"
                   />
                 )}
-                <div
-                  className="notion-body mt-8"
-                  dangerouslySetInnerHTML={{ __html: content.blocks }}
-                />
+                {post.description && (
+                  <p className="mt-6 font-display text-xl italic text-ink-soft">{post.description}</p>
+                )}
+                <div className="notion-body mt-8">
+                  {post.blocks?.length ? (
+                    <Blocks blocks={post.blocks} />
+                  ) : (
+                    <p className="text-ink-muted">This post has no content yet.</p>
+                  )}
+                </div>
                 <div className="mt-10 flex flex-wrap items-center gap-4 border-t border-hairline pt-6">
                   <button
-                    onClick={() => setSelected(null)}
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-dark hover:text-brand"
-                  >
-                    Read on Notion <ArrowUpRight className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setSelected(null)}
+                    onClick={goBack}
                     className="text-sm font-medium text-ink-muted transition-colors hover:text-brand"
                   >
                     Back to all posts
@@ -143,9 +277,9 @@ export default function Blog() {
         ) : (
           <div className="mt-12">
             {loading && <p className="text-ink-muted">Loading posts…</p>}
-            {error && (
+            {error && !loading && (
               <div className="rounded-2xl border border-accent/30 bg-accent/10 p-6 text-sm text-ink-soft">
-                Couldn't load posts.{" "}
+                Couldn't load posts.{' '}
                 <span className="font-mono text-xs">{error}</span>
               </div>
             )}
@@ -156,17 +290,17 @@ export default function Blog() {
             )}
             {!loading && posts.length > 0 && (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {posts.map((post, i) => (
-                  <Reveal key={post.id} delay={i * 80}>
+                {posts.map((p, i) => (
+                  <Reveal key={p.id} delay={i * 80}>
                     <button
-                      onClick={() => openPost(post.id)}
+                      onClick={() => openPost(p.slug)}
                       className="group flex h-full w-full flex-col overflow-hidden rounded-3xl border border-hairline bg-surface text-left shadow-sm transition-all hover:-translate-y-1 hover:border-brand/40 hover:shadow-xl hover:shadow-brand/10"
                     >
-                      {post.cover && (
+                      {p.cover && (
                         <div className="relative h-44 overflow-hidden">
                           <img
-                            src={post.cover}
-                            alt={post.title}
+                            src={p.cover}
+                            alt={p.title}
                             loading="lazy"
                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
@@ -174,24 +308,22 @@ export default function Blog() {
                       )}
                       <div className="flex flex-1 flex-col p-6">
                         <div className="flex items-center gap-2 text-xs text-ink-muted">
-                          {post.date && (
+                          {p.date && (
                             <span className="flex items-center gap-1.5">
                               <CalendarDays className="h-3.5 w-3.5" />
-                              {formatDate(post.date)}
+                              {formatDate(p.date)}
                             </span>
                           )}
                         </div>
                         <h3 className="mt-2.5 font-display text-xl font-medium leading-snug text-ink">
-                          {post.name}
+                          {p.title}
                         </h3>
-                        {post.description && (
-                          <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-                            {post.description}
-                          </p>
+                        {p.description && (
+                          <p className="mt-2 text-sm leading-relaxed text-ink-soft">{p.description}</p>
                         )}
-                        {post.tags?.length > 0 && (
+                        {p.tags.length > 0 && (
                           <div className="mt-3 flex flex-wrap gap-1.5">
-                            {post.tags.map((tag) => (
+                            {p.tags.map((tag) => (
                               <span
                                 key={tag}
                                 className="rounded-full bg-brand/10 px-2.5 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wide text-brand-dark"
@@ -201,8 +333,9 @@ export default function Blog() {
                             ))}
                           </div>
                         )}
-                        <span className="mt-auto pt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-dark transition-colors group-hover:text-brand">
-                          Read article <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                        <span className="mt-auto inline-flex items-center gap-1.5 pt-5 text-sm font-semibold text-brand-dark transition-colors group-hover:text-brand">
+                          Read article{' '}
+                          <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                         </span>
                       </div>
                     </button>
@@ -210,6 +343,14 @@ export default function Blog() {
                 ))}
               </div>
             )}
+            <div className="mt-12 text-center">
+              <Link
+                to="/"
+                className="inline-flex items-center gap-2 rounded-full border border-hairline bg-white px-6 py-3 text-sm font-medium text-ink transition-colors hover:border-brand hover:text-brand"
+              >
+                <ArrowLeft className="h-4 w-4" /> Back to home
+              </Link>
+            </div>
           </div>
         )}
       </div>

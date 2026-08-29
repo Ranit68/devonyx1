@@ -1,3 +1,4 @@
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { ArrowRight, Twitter, Linkedin, Instagram, Github } from 'lucide-react'
 import Logo from './Logo'
 
@@ -22,10 +23,40 @@ const companyLinks = [
   { label: 'Our Work', href: '#work' },
   { label: 'Process', href: '#process' },
   { label: 'Pricing', href: '#pricing' },
-  { label: 'Blog', href: '#blog' },
-  { label: 'Careers', href: '#career' },
+  { label: 'Blog', href: '/blog' },
+  { label: 'Careers', href: '/careers' },
   { label: 'Get a Quote', href: '#contact' },
 ]
+
+function FooterLink({ href, children }) {
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  if (href.startsWith('/')) {
+    return (
+      <Link to={href} className="text-sm text-white/70 transition-colors hover:text-white">
+        {children}
+      </Link>
+    )
+  }
+
+  const onClick = () => {
+    if (location.pathname !== '/') {
+      navigate('/')
+      setTimeout(() => {
+        document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' })
+      }, 120)
+    } else {
+      document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
+  return (
+    <a href={href} onClick={onClick} className="text-sm text-white/70 transition-colors hover:text-white">
+      {children}
+    </a>
+  )
+}
 
 export default function Footer() {
   return (
@@ -61,9 +92,7 @@ export default function Footer() {
             <ul className="mt-5 flex flex-col gap-3">
               {serviceLinks.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="text-sm text-white/70 transition-colors hover:text-white">
-                    {link.label}
-                  </a>
+                  <FooterLink href={link.href}>{link.label}</FooterLink>
                 </li>
               ))}
             </ul>
@@ -74,9 +103,7 @@ export default function Footer() {
             <ul className="mt-5 flex flex-col gap-3">
               {companyLinks.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="text-sm text-white/70 transition-colors hover:text-white">
-                    {link.label}
-                  </a>
+                  <FooterLink href={link.href}>{link.label}</FooterLink>
                 </li>
               ))}
             </ul>

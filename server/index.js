@@ -7,6 +7,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const isNotionConfigured = () => {
+  const token = process.env.NOTION_TOKEN;
+  return !!token && !/PLEASE_PASTE|xxxx+/.test(token);
+};
+
 const notion = new Client({ auth: process.env.NOTION_TOKEN });
 const databaseId = process.env.NOTION_DATABASE_ID;
 const port = process.env.PORT || 8787;
@@ -44,6 +49,9 @@ function mapPost(page) {
 // GET /api/posts -> list published posts (optionally featured)
 app.get("/api/posts", async (req, res) => {
   try {
+    if (!isNotionConfigured()) {
+      return res.status(503).json({ error: "NOTION_TOKEN not configured — paste your Notion integration secret into .env" });
+    }
     const isFeatured = req.query.featured === "true";
     
     const filterConditions = [
@@ -69,6 +77,9 @@ app.get("/api/posts", async (req, res) => {
 // GET /api/posts/:slug -> single published post + blocks
 app.get("/api/posts/:slug", async (req, res) => {
   try {
+    if (!isNotionConfigured()) {
+      return res.status(503).json({ error: "NOTION_TOKEN not configured — paste your Notion integration secret into .env" });
+    }
     const slug = req.params.slug;
 
     const result = await notion.dataSources.query({
@@ -85,12 +96,18 @@ app.get("/api/posts/:slug", async (req, res) => {
     const page = result.results[0];
     if (!page) return res.status(404).json({ error: "Not found" });
 
-    // Fetch page content blocks
-    const blocks = await notion.blocks.children.list({ block_id: page.id });
+    // Fetch all page content blocks (handle pagination)
+    let allBlocks = [];
+    let startCursor;
+    do {
+      const r = await notion.blocks.children.list({ block_id: page.id, start_cursor: startCursor, page_size: 100 });
+      allBlocks = allBlocks.concat(r.results);
+      startCursor = r.has_more ? r.next_cursor : undefined;
+    } while (startCursor);
 
     res.json({
       ...mapPost(page),
-      blocks: blocks.results,
+      blocks: allBlocks,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -99,6 +116,19 @@ app.get("/api/posts/:slug", async (req, res) => {
 
 // Optional health check
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
+
+// Serve built SPA (production) with history fallback so /blog, /careers deep links work
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const distDir = path.resolve(__dirname, "../dist");
+
+if (process.env.NODE_ENV !== "test") {
+  app.use(express.static(distDir));
+  app.get(/^(?!\/api).*/, (req, res) => {
+    res.sendFile(path.join(distDir, "index.html"));
+  });
+}
 
 app.listen(port, async () => {
   console.log(`API running on http://localhost:${port}`);
