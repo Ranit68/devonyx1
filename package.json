@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:api": "node server/index.js",
-    "dev:full": "concurrently -k -n API,WEB \"npm:dev:api\" \"npm:dev\"",
+    "dev:api": "npx nodemon server/index.js",
+    "dev:full": "concurrently -k -n API,WEB \"npm run dev:api\" \"npm run dev\"",
     "build": "vite build",
     "start": "node server/index.js",
     "preview": "vite preview"
