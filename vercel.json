@@ -3,6 +3,18 @@
     {
       "source": "/api/:path*",
       "destination": "/api"
+    },
+    {
+      "source": "/blog",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/blog/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/careers",
+      "destination": "/index.html"
     }
   ]
 }
