@@ -25,7 +25,7 @@ export default function Blog() {
         return res.json()
       })
       .then((data) => {
-        if (!cancelled) setPosts(data.posts || [])
+        if (!cancelled) setPosts(data)
       })
       .catch((err) => {
         if (!cancelled) setError(err.message || 'Could not load posts')
@@ -38,11 +38,13 @@ export default function Blog() {
     }
   }, [])
 
-  const openPost = (id) => {
-    setSelected(id)
+  const openPost = (postId) => {
+    const post = posts.find(p => p.id === postId)
+    if (!post) return
+    setSelected(postId)
     setContent(null)
     setContentLoading(true)
-    fetch(`/api/posts/${id}`)
+    fetch(`/api/posts/${post.slug}`)
       .then((res) => {
         if (!res.ok) throw new Error(`Server responded ${res.status}`)
         return res.json()
@@ -96,40 +98,38 @@ export default function Blog() {
             {content && (
               <>
                 <h3 className="mt-6 font-display text-3xl font-medium tracking-tight text-ink md:text-4xl">
-                  {content.post.title}
+                  {content.name}
                 </h3>
                 <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-muted">
-                  {content.post.date && (
+                  {content.date && (
                     <span className="flex items-center gap-1.5">
-                      <CalendarDays className="h-4 w-4" /> {formatDate(content.post.date)}
+                      <CalendarDays className="h-4 w-4" /> {formatDate(content.date)}
                     </span>
                   )}
-                  {content.post.tags?.length > 0 && (
+                  {content.tags?.length > 0 && (
                     <span className="flex items-center gap-1.5">
-                      <FileText className="h-4 w-4" /> {content.post.tags.join(', ')}
+                      <FileText className="h-4 w-4" /> {content.tags.join(', ')}
                     </span>
                   )}
                 </p>
-                {content.post.cover && (
+                {content.cover && (
                   <img
-                    src={content.post.cover}
-                    alt={content.post.title}
+                    src={content.cover}
+                    alt={content.name}
                     className="mt-8 h-64 w-full rounded-2xl border border-hairline object-cover"
                   />
                 )}
                 <div
                   className="notion-body mt-8"
-                  dangerouslySetInnerHTML={{ __html: content.content }}
+                  dangerouslySetInnerHTML={{ __html: content.blocks }}
                 />
                 <div className="mt-10 flex flex-wrap items-center gap-4 border-t border-hairline pt-6">
-                  <a
-                    href={content.post.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => setSelected(null)}
                     className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-dark hover:text-brand"
                   >
                     Read on Notion <ArrowUpRight className="h-4 w-4" />
-                  </a>
+                  </button>
                   <button
                     onClick={() => setSelected(null)}
                     className="text-sm font-medium text-ink-muted transition-colors hover:text-brand"
@@ -182,7 +182,7 @@ export default function Blog() {
                           )}
                         </div>
                         <h3 className="mt-2.5 font-display text-xl font-medium leading-snug text-ink">
-                          {post.title}
+                          {post.name}
                         </h3>
                         {post.description && (
                           <p className="mt-2 text-sm leading-relaxed text-ink-soft">
