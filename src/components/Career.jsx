@@ -32,16 +32,31 @@ const roles = [
 
 export default function Career() {
   const [selected, setSelected] = useState(roles[0].title)
+  const [submitted, setSubmitted] = useState(false)
+  const [status, setStatus] = useState('idle')
 
-  const buildMailto = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const form = e.currentTarget
-    const data = new FormData(form)
-    const subject = encodeURIComponent(`Application: ${form.role.value}`)
-    const body = encodeURIComponent(
-      `Name: ${data.get('name')}\nEmail: ${data.get('email')}\nRole: ${form.role.value}\nLinkedIn / Portfolio: ${data.get('link') || '—'}\n\nMessage:\n${data.get('message')}`
-    )
-    window.location.href = `mailto:query@devonix.in?subject=${subject}&body=${body}`
+    const data = Object.fromEntries(new FormData(form).entries())
+    setStatus('sending')
+
+    try {
+      const res = await fetch('https://formspree.io/f/maeyndpy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          ...data,
+          _subject: `Job application: ${data.role} — ${data.name}`,
+        }),
+      })
+      if (!res.ok) throw new Error('Submission failed')
+      setStatus('success')
+      setSubmitted(true)
+      form.reset()
+    } catch (err) {
+      setStatus('error')
+    }
   }
 
   return (
@@ -98,12 +113,12 @@ export default function Career() {
 
           <Reveal delay={150}>
             <form
-              onSubmit={buildMailto}
+              onSubmit={handleSubmit}
               className="rounded-3xl border border-hairline bg-surface p-7 shadow-xl shadow-black/[0.04] md:p-8"
             >
               <h3 className="font-display text-xl font-medium text-ink">Apply for a role</h3>
               <p className="mt-1 text-sm text-ink-muted">
-                Your application opens in your email app, addressed to query@devonix.in.
+                Your application is sent securely & we'll get back to you shortly.
               </p>
 
               <div className="mt-6 grid gap-5">
@@ -135,14 +150,35 @@ export default function Career() {
 
               <button
                 type="submit"
-                className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-gradient px-7 py-3.5 text-base font-semibold text-white shadow-lg shadow-brand/25 transition-all hover:shadow-xl hover:shadow-brand/35 hover:brightness-110"
+                disabled={status === 'sending'}
+                className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-gradient px-7 py-3.5 text-base font-semibold text-white shadow-lg shadow-brand/25 transition-all hover:shadow-xl hover:shadow-brand/35 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Send className="h-5 w-5" />
-                Submit Application
+                {status === 'sending' ? 'Submitting…' : 'Submit Application'}
               </button>
+              {status === 'error' && (
+                <p className="mt-3 text-center text-sm text-red-600">
+                  Something went wrong. Please try again or email query@devonix.in.
+                </p>
+              )}
+              {submitted && (
+                <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center">
+                  <h4 className="font-display text-lg font-medium text-emerald-800">Application sent!</h4>
+                  <p className="mt-1 text-sm text-emerald-700">
+                    Thanks for applying. Our team will review your application and get back to you soon.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setSubmitted(false)}
+                    className="mt-3 text-sm font-semibold text-brand-dark hover:text-brand"
+                  >
+                    Submit another application
+                  </button>
+                </div>
+              )}
               <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-ink-muted">
                 <Mail className="h-3.5 w-3.5" />
-                Applications go to query@devonix.in
+                Applications are sent securely via Formspree
               </p>
             </form>
           </Reveal>
