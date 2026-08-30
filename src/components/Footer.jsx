@@ -1,12 +1,11 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { ArrowRight, Twitter, Linkedin, Instagram, Github } from 'lucide-react'
+import { ArrowRight, Twitter, Instagram, Github } from 'lucide-react'
 import Logo from './Logo'
 
 const socialLinks = [
-  { icon: Twitter, label: 'Twitter' },
-  { icon: Linkedin, label: 'LinkedIn' },
-  { icon: Instagram, label: 'Instagram' },
-  { icon: Github, label: 'GitHub' },
+  { icon: Github, label: 'GitHub', href: 'https://github.com/devonyxofficialtech-png' },
+  { icon: Instagram, label: 'Instagram', href: 'https://www.instagram.com/devonyx5?igsi=MTRiOXd2bmY2ZDEyYg==' },
+  { icon: Twitter, label: 'X (Twitter)', href: 'https://x.com/Devonyx01' },
 ]
 
 const serviceLinks = [
@@ -74,10 +73,12 @@ export default function Footer() {
               across the USA, UAE, Netherlands, New Zealand & India.
             </p>
             <div className="mt-6 flex gap-3">
-              {socialLinks.map(({ icon: Icon, label }) => (
+              {socialLinks.map(({ icon: Icon, label, href }) => (
                 <a
                   key={label}
-                  href="#"
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={label}
                   className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/70 transition-colors hover:border-accent hover:bg-accent/10 hover:text-white"
                 >
