@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { lazy, Suspense } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import Stats from './components/Stats'
@@ -13,6 +14,9 @@ import Contact from './components/Contact'
 import Footer from './components/Footer'
 import BlogPage from './pages/BlogPage'
 import CareerPage from './pages/CareerPage'
+import { GoogleReviewLanding, QRRedirectPage, QRSuccessPage, SetupPage } from './pages/GoogleReviewQR'
+const QRLocalTestPage = import.meta.env.DEV ? lazy(() => import('./pages/QRLocalTest')) : null
+const QRBatchAdminPage = lazy(() => import('./pages/QRBatchAdmin'))
 
 function Home() {
   return (
@@ -43,6 +47,13 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/careers" element={<CareerPage />} />
+          <Route path="/admin" element={<Navigate to="/admin/qr-batches" replace />} />
+          <Route path="/google-review-qr" element={<GoogleReviewLanding />} />
+          <Route path="/setup" element={<SetupPage />} />
+          <Route path="/qr-success" element={<QRSuccessPage />} />
+          <Route path="/r/:slug" element={<QRRedirectPage />} />
+          <Route path="/admin/qr-batches" element={<Suspense fallback={<p>Loading QR tools…</p>}><QRBatchAdminPage /></Suspense>} />
+          {import.meta.env.DEV && <Route path="/qr-local-test" element={<Suspense fallback={<p>Loading local test…</p>}><QRLocalTestPage /></Suspense>} />}
         </Routes>
       </div>
     </BrowserRouter>

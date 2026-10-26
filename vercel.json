@@ -1,5 +1,36 @@
 {
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
+        { "key": "Strict-Transport-Security", "value": "max-age=31536000" }
+      ]
+    },
+    {
+      "source": "/admin",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
+    },
+    {
+      "source": "/admin/qr-batches",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
+    }
+  ],
   "rewrites": [
+    { "source": "/r/:slug", "destination": "https://asia-south1-luxxglow.cloudfunctions.net/qrApi/r/:slug" },
+    { "source": "/api/qr/:path*", "destination": "https://asia-south1-luxxglow.cloudfunctions.net/qrApi/api/qr/:path*" },
+    { "source": "/google-review-qr", "destination": "/index.html" },
+    { "source": "/setup", "destination": "/index.html" },
+    { "source": "/qr-success", "destination": "/index.html" },
+    { "source": "/admin", "destination": "/index.html" },
+    { "source": "/admin/qr-batches", "destination": "/index.html" },
     {
       "source": "/api/:path*",
       "destination": "/api"

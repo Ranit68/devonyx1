@@ -11,6 +11,9 @@ const navLinks = [
   { label: 'Pricing', href: '#pricing' },
   { label: 'Blog', href: '/blog', external: true },
   { label: 'Careers', href: '/careers', external: true },
+  { label: 'Review QR', href: '/google-review-qr', external: true },
+  { label: 'Setup', href: '/setup', external: true },
+  { label: 'Admin panel', href: '/admin', external: true },
   { label: 'Contact', href: '#contact' },
 ]
 
@@ -45,7 +48,7 @@ export default function Header() {
   }
 
   const linkClass =
-    'rounded-full px-4 py-2 text-sm font-medium text-ink-soft transition-colors hover:bg-black/[0.04] hover:text-ink'
+    'rounded-full px-3 py-2 text-sm font-medium text-ink-soft transition-colors hover:bg-black/[0.04] hover:text-ink'
 
   return (
     <header
@@ -58,7 +61,7 @@ export default function Header() {
       <div className="container-x flex h-16 items-center justify-between py-3 md:h-20">
         <Logo />
 
-        <nav className="hidden items-center gap-1 lg:flex">
+        <nav className="hidden items-center gap-1 xl:flex">
           {navLinks.map((link) =>
             link.external ? (
               <Link
@@ -81,7 +84,7 @@ export default function Header() {
           )}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-3 xl:flex">
           {location.pathname !== '/' ? (
             <Link
               to="/#contact"
@@ -103,7 +106,7 @@ export default function Header() {
 
         <button
           onClick={() => setOpen(!open)}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-ink lg:hidden"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-ink xl:hidden"
           aria-label="Toggle menu"
         >
           {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -111,7 +114,7 @@ export default function Header() {
       </div>
 
       {open && (
-        <div className="border-t border-hairline bg-paper/95 backdrop-blur-xl lg:hidden">
+        <div className="border-t border-hairline bg-paper/95 backdrop-blur-xl xl:hidden">
           <div className="container-x flex flex-col gap-1 py-6">
             {navLinks.map((link) =>
               link.external ? (

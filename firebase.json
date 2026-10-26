@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs22",
+    "ignore": ["node_modules", ".git"]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}

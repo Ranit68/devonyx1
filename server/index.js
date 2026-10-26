@@ -4,6 +4,8 @@ import cors from "cors";
 import { Client } from "@notionhq/client";
 
 const app = express();
+app.set("trust proxy", 1);
+app.disable("x-powered-by");
 app.use(cors());
 app.use(express.json());
 

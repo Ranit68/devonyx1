@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // All QR product access goes through the trusted server using Admin SDK.
+    match /qrProducts/{slug} {
+      allow read, write: if false;
+    }
+    match /qrActivationCodes/{codeHash} {
+      allow read, write: if false;
+    }
+    // Rate limit data is private to server-side operations as well.
+    match /qrRateLimits/{ipHash} {
+      allow read, write: if false;
+    }
+    match /qrAdminAudit/{eventId} {
+      allow read, write: if false;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
